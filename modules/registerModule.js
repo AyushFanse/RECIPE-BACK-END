@@ -28,11 +28,7 @@ exports.register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const Password = await bcrypt.hash(req.body.password, salt);
 
-<<<<<<< HEAD
     const bio = `Hey I'm New Here...`;
-=======
-    const bio = 'Hey I'm New Here...';
->>>>>>> 11d9bdf0585dd3d103da3c7ff23eceb31f9c633d
     
     const user = new User({
         username:req.body.username,
@@ -83,6 +79,6 @@ exports.login = async (req, res, next) => {
     var isValid = await bcrypt.compare(req.body.password, existUser.password);
     if(!isValid) return res.status(400).send({alert: "Password doesn't match."});
 
-    var token = jwt.sign({user}, 'SWERA', {expiresIn: '5h'});
+    var token = jwt.sign({user}, 'SWERA', {expiresIn: '2h'});
     res.send(token);
 }
