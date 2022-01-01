@@ -28,7 +28,11 @@ exports.register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const Password = await bcrypt.hash(req.body.password, salt);
 
+<<<<<<< HEAD
     const bio = `Hey I'm New Here...`;
+=======
+    const bio = 'Hey I'm New Here...';
+>>>>>>> 11d9bdf0585dd3d103da3c7ff23eceb31f9c633d
     
     const user = new User({
         username:req.body.username,
