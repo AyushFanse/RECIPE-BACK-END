@@ -35,22 +35,3 @@ const multiMediaSchema = new Schema({
 ///////////////////////////* Exporting Part*////////////////////////////
 
 module.exports = mongoose.model('Multi_Media', multiMediaSchema)
-
-// {
-//     username: {
-//         type: 'string',
-//         required: true
-//     },
-//     messId: {
-//         type: 'string',
-//         required: true
-//     },
-//     message: {
-//         type: 'string',
-//         required: true
-//     },
-//     messTime: {
-//         type: 'string',
-//         required: true
-//     }
-// }
