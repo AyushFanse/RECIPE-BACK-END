@@ -4,7 +4,15 @@ const Schema = mongoose.Schema;
 
 ///////////////////////////* Schema for User Data *////////////////////////////
 
-const userSchema = new Schema({
+const userSchema = new Schema({    
+    file:{
+        type: String,
+        required : true
+    },
+    cloudinary_id:{
+        type: String,
+        required : true
+    },
     first_name:{
         type : String,
         required : true
@@ -50,5 +58,5 @@ const userSchema = new Schema({
 
 ///////////////////////////* Exporting Part*////////////////////////////
 
-const User = mongoose.model('User' ,userSchema ,'CMS-Users' );
+const User = mongoose.model('User' ,userSchema ,'Users' );
 module.exports = User;

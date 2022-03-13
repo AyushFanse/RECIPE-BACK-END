@@ -1,10 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var Register = require('../modules/registerModule');
+const upload = require('../middleWare/multer');
 
 //----------------------------* Resister Router *----------------------------//
 
-router.post('/registeruser', Register.register);
+router.post('/registeruser', upload.single('file'), Register.register);
 
 //----------------------------* Login Router *----------------------------//
 

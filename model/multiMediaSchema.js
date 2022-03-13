@@ -7,28 +7,42 @@ const Schema = mongoose.Schema;
 
 const multiMediaSchema = new Schema({ 
     title: {
-        type: 'string',
+        type: String,
         required: true
     },
     username: {
-        type: 'string',
+        type: String,
         required: true
     },
     userId: {
-        type: 'string',
+        type: String,
         required: true
     },
     likes: [Object],
     comments: [Object],
     recipe: {
-        type: 'string',
+        type: String,
         required: true
     },
     time: {
-        type: 'string',
-        required: true
+        type: Date,
+        default: new Date()
     },
-    files:[Object]
+    files:[{
+                filepath: {
+                    type: String,
+                    required: true
+                },
+                cloudinary_id: {
+                    type: String,
+                    required: true
+                },
+                filesize: {
+                    type: String,
+                    required: true
+                }
+            }]
+            
 }, {timestamps: true});
 
 

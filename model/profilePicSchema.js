@@ -6,17 +6,28 @@ const Schema = mongoose.Schema;
 
 const profileSchema = new Schema({
     file:{
-        type: 'object',
+        type: String,
         required: true
     },
+    cloudinary_id:  {
+        type: String,
+        required: true
+    },
+    filesize:  {
+        type: String
+    },
     username: {
-        type: 'string',
+        type: String,
         required: true
     },
     email: {
-        type: 'string',
+        type: String,
         required: true
-    }
+    },
+    userId:{
+        type: String,
+        required: true
+    },
 }, {timestamps: true});
 
 

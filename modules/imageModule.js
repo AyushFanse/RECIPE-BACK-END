@@ -1,102 +1,33 @@
-'use strict';
-const profilePic = require('../model/profilePicSchema');
 const multiMedia = require('../model/multiMediaSchema');
-
-///////////////////////////* Single File Upload *////////////////////////////
-
-const profilePicUpload = async (req, res, next) => {
-    try{
-        const fileData ={
-            filename: req.file.originalname,
-            filepath: req.file.path,
-            filetype: req.file.mimetype,
-            filesize: fileSizeFormatter(req.file.size,2)
-        }
-        const file = new profilePic({
-            username:  req.body.username,
-            email:req.body.email,
-            file: fileData
-        });
-        await file.save();
-        res.status(201).send('File has beed uploaded...!');
-    }catch(error){
-        res.status(400).send(error.message);
-    }
-}
-
-
-///////////////////////////* Get All ProfilePic From DataBase *////////////////////////////
-
-const getAllProfilePics = async (req, res, next) => {
-    try{
-        const pics = await profilePic.find();
-        res.status(200).send(pics);
-    }catch(error){
-        res.status(400).send(error.message);
-    }
-}
-
-
-///////////////////////////* Patch ProfilePic From DataBase *////////////////////////////
-
-const updateProfilePic = async (req, res, next) => {
-    try{
-        const pic = await profilePic.findByIdAndUpdate(req.params.id,{
-            filename: req.file.originalname,
-            filepath: req.file.path,
-            filetype: req.file.mimetype,
-            filesize: fileSizeFormatter(req.file.size,2)
-        });
-        res.status(200).send(pic);
-    }catch(error){
-        res.status(400).send(error.message);
-    }
-   
-    
-}
-
-
-///////////////////////////* Delete ProfilePic From DataBase *////////////////////////////
-
-const deleteProfilePic = async (req, res, next) => {
-    try{
-        const pic = await profilePic.findByIdAndRemove(req.params.id);
-        res.status(200).send(pic);
-    }catch(error){
-        res.status(400).send(error.message);
-    }
-}
-
+const cloudinary = require("../middleWare/cloudinary");
 
 ///////////////////////////* Multipal File Upload *////////////////////////////
 
 const multipleMediaUpload = async (req, res,next) => {
     try{
         let filesArray = [];
-        req.files.forEach(element=>{
-        const file = {
-            filename: element.originalname,
-            filepath: element.path,
-            filetype: element.mimetype,
-            filesize: fileSizeFormatter(element.size,2)
-        }
-        filesArray.push(file);
-    });
+        for (let i = 0; i < req.files.length; i++) {
+            const locaFilePath = req.files[i].path;
+            const result = await cloudinary.uploader.upload(locaFilePath,{upload_preset:"Recipe_Media"});
+            const file = {
+                            filepath: result.secure_url,
+                            cloudinary_id: result.public_id,
+                            filesize: fileSizeFormatter(req.files[i].size,2)
+                        }
+            filesArray.push(file);
+            }
         const multipleFiles = new multiMedia({
             title: req.body.title,
             files: filesArray,
             username: req.body.username,
             recipe: req.body.recipe,
-            userId: req.body.userId,
-            likes: req.body.likes,
-            comments: req.body.comments,
-            time: req.body.time
+            userId: req.body.userId
         });
         await multipleFiles.save();
-        console.log("Multipul uploaded, All set....");
-        res.status(201).send('File has beed uploaded...!');
-    }catch(error){
-        res.status(400).send(error.message);
+        res.status(201).json({msg:'File has beed uploaded...!'});
+    }catch(err){
+        console.log(err)
+        res.status(400).send(err);
     }
 }
 
@@ -107,8 +38,8 @@ const getAllMultiMedias = async (req, res, next) => {
     try{
         const media = await multiMedia.find();
         res.status(200).send(media);
-    }catch(error){
-        res.status(400).json({ msg: 'Fill Title, Images and Recipe all are is required' }).send(error.message);
+    }catch(err){
+        res.status(400).json({ msg: 'Fill Title, Images and Recipe all are is required' }).send(err);
     }
 }
 
@@ -116,27 +47,43 @@ const getAllMultiMedias = async (req, res, next) => {
 ///////////////////////////* Patch Multi_Media From DataBase *////////////////////////////
 
 const updateMultiMedia = async (req, res, next) => {
+    
     try{
+        let media = await multiMedia.findByIdAndUpdate(req.params.id)
         let filesArray = [];
-        req.files.forEach(element=>{
-        const file = {
-            filename: element.originalname,
-            filepath: element.path,
-            filetype: element.mimetype,
-            filesize: fileSizeFormatter(element.size,2)
+
+        if(req.files){
+        for (let i = 0; i < req.files.length; i++) {
+            const locaFilePath = req.files[i].cloudinary_id;
+
+            await cloudinary.uploader.destroy(locaFilePath.cloudinary_id,{
+                upload_preset:"Recipe_Media"
+            });   
         }
-        filesArray.push(file);
-        });
-        var media = await multiMedia.findByIdAndUpdate(req.params.id,{
-            recipe: req.body.recipe,
-            userId: req.body.userId,
+
+        for (let i = 0; i < req.files.length; i++) {
+            const locaFilePath = req.files[i].path;
+            const result = await cloudinary.uploader.upload(locaFilePath,{
+                upload_preset:"Recipe_Media"
+            });
+            const file = {
+                            filepath: result.secure_url,
+                            cloudinary_id: result.public_id,
+                            filesize: fileSizeFormatter(req.files[i].size,2)
+                        }
+            filesArray.push(file);
+            }
+        }
+
+        await multiMedia.findByIdAndUpdate(req.params.id,{
+            recipe: req.body.recipe || media.first_name,
             files: filesArray,
-            likes: req.body.likes,
-            comments: req.body.comments
+            title: req.body.title || media.title,      
+            time:new Date()
             },{new : true})
-        res.status(200).send(media);
-    }catch(error){
-        res.status(400).send(error.message);
+        res.status(200).json({msg:"You have successfully updated your post..!"});
+    }catch(err){
+        res.status(400).send(err);
     }
 }
 
@@ -145,12 +92,12 @@ const updateMultiMedia = async (req, res, next) => {
 
 const LikeMultiMedia = async (req, res, next) => {
     try{
-        var like = await multiMedia.findByIdAndUpdate(req.params.id,{            
+        await multiMedia.findByIdAndUpdate(req.params.id,{            
             $push:{likes: req.body.likes}
             },{new : true})
-        res.status(200).send(like);
-    }catch(error){
-        res.status(400).send(error.message);
+        res.status(200);
+    }catch(err){
+        res.status(400).send(err);
     }
 }
 
@@ -160,12 +107,12 @@ const LikeMultiMedia = async (req, res, next) => {
 
 const UnlikeMultiMedia = async (req, res, next) => {
     try{
-        var unlike = await multiMedia.findByIdAndUpdate(req.params.id,{            
+        await multiMedia.findByIdAndUpdate(req.params.id,{            
             $pull:{likes: req.body.likes}
             },{new : true})
-        res.status(200).send(unlike);
+        res.status(200);
     }catch(error){
-        res.status(400).send(error.message);
+        res.status(400).send(err);
     }
 }
 
@@ -178,16 +125,16 @@ const commentsMultiMedia = async (req, res, next) => {
                 username: req.body.username,
                 messId: req.body.messId,
                 message: req.body.message,
-                messTime: req.body.messTime
+                messTime: new Date()
         }
-        var comment = await multiMedia.findByIdAndUpdate(req.params.id,{            
+        await multiMedia.findByIdAndUpdate(req.params.id,{            
             $push:{
                 comments : message
             }
             },{new : true})
-        res.status(200).send(comment);
-    }catch(error){
-        res.status(400).send(error.message);
+        res.status(200);
+    }catch(err){
+        res.status(400).send(err);
     }
 }
 
@@ -195,7 +142,7 @@ const commentsMultiMedia = async (req, res, next) => {
 
 const deleteCommentsMultiMedia = async (req, res, next) => {
     try{
-        var comment = await multiMedia.findByIdAndUpdate(req.params.id,{            
+        await multiMedia.findByIdAndUpdate(req.params.id,{            
             $pull:{
                 username: req.body.username,
                 messId: req.body.userId,
@@ -203,9 +150,9 @@ const deleteCommentsMultiMedia = async (req, res, next) => {
                 messTime: req.body.messTime
             }
             },{new : true})
-        res.status(200).send(comment);
-    }catch(error){
-        res.status(400).send(error.message);
+        res.status(200);
+    }catch(err){
+        res.status(400).send(err);
     }
 }
 
@@ -215,10 +162,20 @@ const deleteCommentsMultiMedia = async (req, res, next) => {
 
 const deleteMultiMedia = async (req, res, next) => {
     try{
-        const media = await multiMedia.findByIdAndRemove(req.params.id);
-        res.status(200).send(media);
-    }catch(error){
-        res.status(400).send(error.message);
+        await multiMedia.findById(req.params.id);
+        if(req.files){
+            for (let i = 0; i < req.files.length; i++) {
+                const locaFilePath = req.files[i].cloudinary_id;
+    
+                await cloudinary.uploader.destroy(locaFilePath.cloudinary_id,{
+                    upload_preset:"Recipe_Media"
+                });   
+            }
+        }
+        await multiMedia.findByIdAndRemove(req.params.id);
+        res.status(200);
+    }catch(err){
+        res.status(400).send(err);
     }
 }
 
@@ -239,15 +196,10 @@ const fileSizeFormatter = (bytes, decimal) =>{
 
 
 
-
 ///////////////////////////* Exporting Part *////////////////////////////
 
 
 module.exports= {
-                    profilePicUpload ,
-                    getAllProfilePics,
-                    updateProfilePic,
-                    deleteProfilePic,
                     multipleMediaUpload,
                     updateMultiMedia,
                     getAllMultiMedias,

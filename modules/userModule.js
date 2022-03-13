@@ -1,4 +1,5 @@
 const User = require('../model/User');
+const cloudinary = require("../middleWare/cloudinary");
 const  bcrypt = require('bcrypt');
 const Joi = require('joi');
 
@@ -7,8 +8,8 @@ const Joi = require('joi');
 
 exports.getUser = async(req, res, next)=>{
     try{
-      var response = await User.find();
-      res.status(200).send(response);
+      await User.find();
+        res.status(200);
     }catch(err){
       res.status(400).send(err);
   }
@@ -19,10 +20,10 @@ exports.getUser = async(req, res, next)=>{
 
 exports.getUserById = async(req, res, next)=>{
   try{
-    var response = await User.findById(req.params.userId);
-    res.status(200).send(response);
+    const post = await User.findById(req.params.userId);
+      res.status(200).send(post);
   }catch(err){
-    res.status(400).send(err);
+      res.status(400).send(err);
 }
 };
 
@@ -31,16 +32,31 @@ exports.getUserById = async(req, res, next)=>{
   exports.updateUser =async (req, res, next)=>{
 
     try{
-      var response = await User.findByIdAndUpdate(req.params.userId,{
-        first_name:req.body.first_name,
-        last_name:req.body.last_name,
-        username:req.body.username,
-        email:req.body.email,
-        number:req.body.number,
-        address:req.body.address,
-        bio:req.body.bio
-      },{new : true})
-      res.status(200).send(response);
+      const user = await User.findById(req.params.userId);
+      // Upload image to cloudinary
+      let result;
+      if (req.file) {
+        
+        await cloudinary.uploader.destroy(user.cloudinary_id);
+
+        result = await cloudinary.uploader.upload(req.file.path,{
+          upload_preset:"Recipe_Profile"
+      });
+      }
+      
+      const data = {
+        first_name: req.body.first_name || user.first_name,
+        last_name: req.body.last_name || user.last_name,
+        username: req.body.username || user.username,
+        number: req.body.number || user.number,
+        address: req.body.address || user.address,
+        email: req.body.email || user.email,
+        bio: req.body.bio || user.bio,
+        file: result?.secure_url || user.file,
+        cloudinary_id: result?.public_id || user.cloudinary_id
+      };
+      const response = await User.findByIdAndUpdate(req.params.userId, data, { new: true });
+      res.status(200).json({msg : "You have successfully updated your account..!", status : "success"});
     }catch(err){
       res.status(400).send(err);
   }
@@ -56,7 +72,7 @@ exports.getUserById = async(req, res, next)=>{
       const response = await User.findByIdAndUpdate(req.params.userId,{
         password:newPassword
       },{new : true})
-      res.status(200).send(response);
+      res.status(200).json({msg : "You have successfully updated your account..!", status : "success"});
     }catch(err){
       res.status(400).send(err);
   }
@@ -66,8 +82,10 @@ exports.getUserById = async(req, res, next)=>{
 
   exports.deleteUser =async (req, res, next) => {
     try{
-      var response = await User.findByIdAndRemove(req.params.userId);
-      res.status(200).send(response);
+      const post = await User.findById(req.params.userId);
+        await cloudinary.uploader.destroy(post.cloudinary_id);
+        const response = await User.findByIdAndRemove(req.params.userId);
+      res.status(200).json({msg : "You have successfully deleted your account..!", status : "success"});
     }catch(err){
       res.status(400).send(err);
     }
@@ -78,10 +96,10 @@ exports.getUserById = async(req, res, next)=>{
 
  exports.SavePost = async (req, res, next) => {
   try{
-      let post = await User.findByIdAndUpdate(req.params.userId,{            
+      await User.findByIdAndUpdate(req.params.userId,{            
           $push:{saved: req.body.saved}
           },{new : true})
-      res.status(200).send(post);
+      res.status(200).json({msg:"Post saved"});
   }catch(error){
       res.status(400).send(error.message);
   }
@@ -96,21 +114,8 @@ exports.getUserById = async(req, res, next)=>{
       let post = await User.findByIdAndUpdate(req.params.userId,{            
           $pull:{saved: req.body.saved}
           },{new : true})
-      res.status(200).send(post);
+      res.status(200).json({msg:"Post removed"});
   }catch(error){
       res.status(400).send(error.message);
   }
 }
-
-
-
-  ///////////////////////////* Get User By Id  *////////////////////////////
-
-  // exports.getUserById = async(req, res, next)=>{
-  //   try{
-  //     var response = await User.findOne({"username": req.params.username}).exec();
-  //     res.status(200).send(response);
-  //   }catch(err){
-  //     res.status(400).send(err);
-  // }
-  // };

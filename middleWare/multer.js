@@ -1,31 +1,16 @@
-'use strict';
-const multer = require('multer');
+const multer = require("multer");
+const path = require("path");
 
-
-///////////////////////////* Multer Formatter *////////////////////////////
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) =>{
-        cb(null, 'uploads');    
-    },
-    filename: (req, file, cb) =>{
-        var ext = file.originalname.substr(file.originalname.lastIndexOf('.'));
-        cb(null, 'PIC'+ '-' + Date.now() + ext);
+// Multer config
+module.exports = multer({
+  storage: multer.diskStorage({}),
+  
+  fileFilter: (req, file, cb) => {
+    let ext = path.extname(file.originalname);  
+    if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png" && ext !== ".webp") {
+      cb(new Error("File type is not supported"), false);
+      return;
     }
+    cb(null, true);
+  },
 });
-
-
-///////////////////////////* Filtering Process *////////////////////////////
-
-const filefilter = (req, file, cb) =>{
-    if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg'){
-        cb(null,true);
-    }else{
-        cb(null,false);
-    }
-}
-
-
-
-const upload = multer({storage: storage, fileFilter: filefilter});
-module.exports = {upload};
