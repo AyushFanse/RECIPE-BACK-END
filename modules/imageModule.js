@@ -44,6 +44,18 @@ const getAllMultiMedias = async (req, res, next) => {
 }
 
 
+///////////////////////////* Get All Multi_Media From DataBase *////////////////////////////
+
+const getMultiMediaById = async (req, res, next) => {
+    try{
+        const media = await multiMedia.findById(req.params.postId);
+        res.status(200).send(media);
+    }catch(err){
+        res.status(400).json({ msg: 'Fill Title, Images and Recipe all are is required' }).send(err);
+    }
+}
+
+
 ///////////////////////////* Patch Multi_Media From DataBase *////////////////////////////
 
 const updateMultiMedia = async (req, res, next) => {
@@ -95,7 +107,7 @@ const LikeMultiMedia = async (req, res, next) => {
         await multiMedia.findByIdAndUpdate(req.params.id,{            
             $push:{likes: req.body.likes}
             },{new : true})
-        res.status(200);
+        res.status(200).json({msg:'Liked'});
     }catch(err){
         res.status(400).send(err);
     }
@@ -110,7 +122,7 @@ const UnlikeMultiMedia = async (req, res, next) => {
         await multiMedia.findByIdAndUpdate(req.params.id,{            
             $pull:{likes: req.body.likes}
             },{new : true})
-        res.status(200);
+        res.status(200).json({msg:'Disliked'});
     }catch(error){
         res.status(400).send(err);
     }
@@ -132,7 +144,7 @@ const commentsMultiMedia = async (req, res, next) => {
                 comments : message
             }
             },{new : true})
-        res.status(200);
+        res.status(200).json({msg:'comment'});
     }catch(err){
         res.status(400).send(err);
     }
@@ -142,12 +154,15 @@ const commentsMultiMedia = async (req, res, next) => {
 
 const deleteCommentsMultiMedia = async (req, res, next) => {
     try{
-        await multiMedia.findByIdAndUpdate(req.params.id,{            
-            $pull:{
+        const message = {
                 username: req.body.username,
-                messId: req.body.userId,
+                messId: req.body.messId,
                 message: req.body.message,
                 messTime: req.body.messTime
+        }
+        await multiMedia.findByIdAndUpdate(req.params.id,{            
+            $pull:{
+                comments : message
             }
             },{new : true})
         res.status(200);
@@ -203,6 +218,7 @@ module.exports= {
                     multipleMediaUpload,
                     updateMultiMedia,
                     getAllMultiMedias,
+                    getMultiMediaById,
                     deleteMultiMedia,
                     LikeMultiMedia,
                     UnlikeMultiMedia,

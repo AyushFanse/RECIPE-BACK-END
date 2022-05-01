@@ -1,7 +1,6 @@
 const User = require('../model/User');
 const cloudinary = require("../middleWare/cloudinary");
 const  bcrypt = require('bcrypt');
-const Joi = require('joi');
 
 
 ///////////////////////////* Get All Users From DataBase *////////////////////////////

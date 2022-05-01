@@ -26,16 +26,16 @@ exports.register = async (req, res, next) => {
     
 
     var {error} = schema.validate(req.body);
-    if (error) return res.status(400).json({data:{msg : error.details[0].message}});
+    if (error) return res.status(400).json({msg : error.details[0].message});
 
     var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(existUser) return res.status(400).json({data:{msg : "Email already exists."}, status : 400});
+    if(existUser) return res.status(400).json({msg : "Email already exists.", status : 400});
 
     var existUser = await User.findOne({"username": req.body.username}).exec();
-    if(existUser) return res.status(400).json({data:{msg : "Username already exists."}, status : 400});
+    if(existUser) return res.status(400).json({msg : "Username already exists.", status : 400});
 
     var existUser = await User.findOne({"number": req.body.number}).exec();
-    if(existUser) return res.status(400).json({data:{msg : "Number already exists."}, status : 400});
+    if(existUser) return res.status(400).json({msg : "Number already exists.", status : 400});
 
 
 
@@ -64,8 +64,8 @@ exports.register = async (req, res, next) => {
         bio:bio
     })
     try{
-        await user.save();
-        res.status(200).json({data:{msg : "You have successfully created your account..!"}, status : 200});
+        let response = await user.save();
+        res.status(200).json({msg : "You have successfully created your account..!", data : response});
     }catch(err){
         res.status(400).send(err);
     }

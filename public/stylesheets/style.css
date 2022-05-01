@@ -8,8 +8,8 @@ h1{
   height: auto;
   display: flex;
   font-size: 6rem;
-  justify-content: space-around;
   color: #006eff;
+  justify-content: space-around;
 }
 p{
   height: auto;
@@ -17,13 +17,18 @@ p{
   font-size: 1.8rem;
   justify-content: space-around;
 }
+h5{
+  margin-top:70px;
+  text-align:center;
+}
 a{
   height: auto;
   display: flex;
-  font-size: 0.8rem;
+  color:rgb(255, 16, 28);
+  font-size: 1.5rem;
+  text-decoration: none;
   justify-content: space-around;
 }
-h5{
-  text-align:center;
-  margin-top:70px;
+a:hover{
+  color:rgb(16, 84, 255)
 }

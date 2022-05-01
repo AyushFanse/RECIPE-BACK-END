@@ -24,10 +24,6 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser());
-
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 ///////////////////////////* Routers *////////////////////////////
@@ -57,7 +53,7 @@ app.use(function(err, req, res, next) {
 
 ///////////////////////////* Setting Port *////////////////////////////
 
-var port =process.env.PORT || '3001';
+var port =process.env.PORT || '3005';
 app.set('port', port);
 app.listen(port, () => console.log(`Server is stated on http://localhost:${port}`));
 

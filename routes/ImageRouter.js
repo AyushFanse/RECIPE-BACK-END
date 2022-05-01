@@ -9,6 +9,7 @@ const {
             LikeMultiMedia,
             UnlikeMultiMedia,
             commentsMultiMedia,
+            getMultiMediaById,
             deleteCommentsMultiMedia
       } = require('../modules/imageModule');
     
@@ -18,6 +19,7 @@ const {
 
 router.post('/multimedia', upload.array('files', 12),multipleMediaUpload);
 router.get('/multimedia/get/all', getAllMultiMedias);
+router.get('/multimedia/get/:postId', getMultiMediaById);
 router.patch('/multimedia/update/:id', upload.array('files', 12),updateMultiMedia);
 router.delete('/multimedia/delete/:id',deleteMultiMedia);
 router.put('/multimedia/like/:id', LikeMultiMedia);
