@@ -88,7 +88,7 @@ exports.login = async (req, res, next) => {
     if (error) return res.status(400).send({msg : error.details[0].message});
 
     var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(!existUser) return res.status(200).send({msg : "Email not reqistered", status : "error"});
+    if(!existUser) return res.status(400).send({msg : "Email not reqistered", status : "error"});
 
     var user={};
     user.first_name = existUser.first_name;
@@ -101,7 +101,7 @@ exports.login = async (req, res, next) => {
     
 
     var isValid = await bcrypt.compare(req.body.password, existUser.password);
-    if(!isValid) return res.status(200).send({msg : "Password doesn't match.", status : "error"});
+    if(!isValid) return res.status(400).send({msg : "Password doesn't match.", status : "error"});
 
     var token = jwt.sign({user}, 'SWERA', {expiresIn: '2h'});
     res.send({userToken : token, status : "success"});
