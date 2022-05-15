@@ -65,7 +65,7 @@ exports.register = async (req, res, next) => {
     })
     try{
         let response = await user.save();
-        res.status(200).json({msg : "You have successfully created your account..!", data : response});
+        res.status(201).json({msg : "You have successfully created your account..!", data : response});
     }catch(err){
         res.status(400).send(err);
     }
